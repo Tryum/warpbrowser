@@ -8,7 +8,7 @@ pub struct Browser {
     pub path: String,
 }
 
-pub fn list_browsers() -> io::Result<Vec<Browser>> {
+pub fn get_browsers() -> io::Result<Vec<Browser>> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let mut browsers = Vec::new();
 
