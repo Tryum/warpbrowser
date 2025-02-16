@@ -5,6 +5,8 @@ use winreg::{
     RegKey,
 };
 
+use crate::windows::get_windows_version;
+
 const BROWSER_NAME: &str = "WarpBrowser";
 const HANDLER_NAME: &str = "WarpBrowserURL";
 
@@ -136,14 +138,40 @@ pub fn register_browser() {
 }
 
 pub fn set_default_browser() {
-    Command::new("cmd")
-        .args([
-            "/C",
-            &format!(
-                "start ms-settings:defaultapps?registeredAppUser={}",
-                BROWSER_NAME
-            ),
-        ])
-        .spawn()
-        .expect("Failed to open default apps settings");
+    let windows_version = get_windows_version().expect("Failed to get windows version");
+    match windows_version.0 {
+        10 => {
+            let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+            let http_key = hkcu.open_subkey_with_flags(
+                r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice",
+                KEY_WRITE,
+            ).expect("Failed to open http handler reg key");
+            let https_key = hkcu.open_subkey_with_flags(
+                r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice",
+                KEY_WRITE,
+            ).expect("Failed to open https handler reg key");
+
+            http_key
+                .set_value("ProgId", &HANDLER_NAME.to_string())
+                .expect("Failed to change http handler");
+            https_key
+                .set_value("ProgId", &HANDLER_NAME.to_string())
+                .expect("Failed to change https handler");
+        }
+        11 => {
+            Command::new("cmd")
+                .args([
+                    "/C",
+                    &format!(
+                        "start ms-settings:defaultapps?registeredAppUser={}",
+                        BROWSER_NAME
+                    ),
+                ])
+                .spawn()
+                .expect("Failed to open default apps settings");
+        }
+        _ => {
+            tracing::error!("Unsupported version of windows {:?}", windows_version);
+        }
+    }
 }

@@ -14,6 +14,7 @@ use url::Url;
 mod browsers;
 mod config;
 mod link_processor;
+mod windows;
 
 fn select_browser(browsers: &[Browser], prompt: String) -> String {
     let options: Vec<String> = browsers.iter().map(|b| b.name.clone()).collect();
