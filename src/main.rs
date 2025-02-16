@@ -46,7 +46,7 @@ fn main() -> io::Result<()> {
                 .short('u')
                 .long("url")
                 .help("The URL to capture and redirect")
-                .value_name("website")
+                .value_name("url")
                 .exclusive(true),
         )
         .arg(
