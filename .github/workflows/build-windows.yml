@@ -1,4 +1,6 @@
 name: Windows Build and Release
+permissions:
+  contents: write
 on:
   push: # Run on every push
     branches:
