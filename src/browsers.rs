@@ -1,7 +1,7 @@
 use std::{io, process::Command};
 
 use winreg::{
-    enums::{HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_WRITE},
+    enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_WRITE},
     RegKey,
 };
 
@@ -57,7 +57,7 @@ pub fn register_browser() {
     let (key, _) = hkcu
         .create_subkey(path)
         .expect("Failed to create registry key");
-    key.set_value("", &format!("{}", BROWSER_NAME))
+    key.set_value("", &BROWSER_NAME.to_string())
         .expect("Failed to set registry value");
 
     let command_path = r"shell\open\command";
@@ -135,17 +135,9 @@ pub fn register_browser() {
     println!("Registered successfully.");
 }
 
-pub fn unregister_browser() {
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let path = format!(r"Software\Classes\{}", BROWSER_NAME);
-    hkcu.delete_subkey(&path)
-        .expect(&format!("Failed to remove {} from registry", path));
-}
-
 pub fn set_default_browser() {
-    register_browser();
     Command::new("cmd")
-        .args(&[
+        .args([
             "/C",
             &format!(
                 "start ms-settings:defaultapps?registeredAppUser={}",

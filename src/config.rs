@@ -15,12 +15,10 @@ impl Config {
     fn get_config_path() -> io::Result<PathBuf> {
         match dirs::home_dir() {
             Some(path) => Ok(path.join(CONFIG_FILE)),
-            None => {
-                return Err(io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    "Home directory not found",
-                ))
-            }
+            None => Err(io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "Home directory not found",
+            )),
         }
     }
 

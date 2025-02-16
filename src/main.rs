@@ -3,10 +3,7 @@ use std::fs::File;
 use std::io::Write;
 use std::{env, io};
 
-use browsers::{
-    get_browsers, get_default_browser, register_browser, set_default_browser, unregister_browser,
-    Browser,
-};
+use browsers::{get_browsers, get_default_browser, register_browser, set_default_browser, Browser};
 use clap::{Arg, ArgAction, Command};
 use config::Config;
 use dialoguer::theme::ColorfulTheme;
@@ -18,7 +15,7 @@ mod browsers;
 mod config;
 mod link_processor;
 
-fn select_browser(browsers: &Vec<Browser>, prompt: String) -> String {
+fn select_browser(browsers: &[Browser], prompt: String) -> String {
     let options: Vec<String> = browsers.iter().map(|b| b.name.clone()).collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -52,26 +49,11 @@ fn main() -> io::Result<()> {
                 .exclusive(true),
         )
         .arg(
-            Arg::new("browsers")
-                .short('l')
-                .long("list-browsers")
-                .exclusive(true)
-                .action(ArgAction::SetTrue)
-                .help("List available browsers"),
-        )
-        .arg(
             Arg::new("register")
                 .long("register")
                 .exclusive(true)
                 .action(ArgAction::SetTrue)
                 .help("Register in system browser list"),
-        )
-        .arg(
-            Arg::new("unregister")
-                .long("unregister")
-                .exclusive(true)
-                .action(ArgAction::SetTrue)
-                .help("Unregister from system browser list"),
         )
         .arg(
             Arg::new("select_browser")
@@ -89,32 +71,25 @@ fn main() -> io::Result<()> {
         )
         .get_matches();
 
-    //let default_browser = get_default_browser().expect("Couldn't get default browser");
-
     let browsers = get_browsers()?;
 
     let mut config = Config::load()?;
 
-    if matches.get_flag("browsers") {
-        for b in browsers {
-            println!("- {} : {}", b.name, b.path);
-        }
-        return Ok(());
-    }
-
     if matches.get_flag("register") {
+        if let Some(default_browser) = get_default_browser() {
+            config.set_default_browser(default_browser);
+            config.save()?;
+        }
         register_browser();
         set_default_browser();
         return Ok(());
     }
 
-    if matches.get_flag("unregister") {
-        unregister_browser();
-        return Ok(());
-    }
-
     if matches.get_flag("select_browser") {
-        let browser = select_browser(&browsers, format!("Choose a default browser to open  URLs"));
+        let browser = select_browser(
+            &browsers,
+            "Choose a default browser to open  URLs".to_string(),
+        );
         config.set_default_browser(browser);
         config.save().expect("Failed to save default browser");
         return Ok(());
@@ -130,8 +105,6 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
-    let default_browser = "Mozilla Firefox";
-
     let mut browser_map = HashMap::new();
 
     for browser in browsers {
@@ -141,7 +114,8 @@ fn main() -> io::Result<()> {
     let browser_rules = config.rules();
 
     if let Some(url) = matches.get_one::<String>("url") {
-        process_link(url, &browser_map, browser_rules, default_browser);
+        let default_browser = config.default_browser();
+        process_link(url, &browser_map, browser_rules, &default_browser);
     }
 
     Ok(())
