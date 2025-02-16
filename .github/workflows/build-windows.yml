@@ -1,0 +1,26 @@
+name: Build Windows Binary
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc # Or x86_64-pc-windows-gnu if needed
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Build binary
+        run: cargo build --release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binary
+          path: target/release/*.exe
+          retention-days: 7 # Keep artifacts for 7 days
