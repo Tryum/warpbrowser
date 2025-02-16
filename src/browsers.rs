@@ -93,7 +93,7 @@ pub fn register_browser() {
         .expect("Failed to create https url association");
 
     let binary_open_command = format!(
-        r#""{}"  --open "%1""#,
+        r#""{}"  --url "%1""#,
         std::env::current_exe().unwrap().display()
     );
 
