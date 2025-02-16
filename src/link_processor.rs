@@ -2,8 +2,8 @@ use std::{collections::HashMap, os::windows::process::CommandExt, process::Comma
 
 pub fn process_link<'a>(
     url: &'a str,
-    browser_map: HashMap<String, String>,
-    browser_rules: HashMap<&str, &str>,
+    browser_map: &HashMap<String, String>,
+    browser_rules: &HashMap<String, String>,
     default_browser: &'a str,
 ) {
     const DETACHED_PROCESS: u32 = 0x00000008;

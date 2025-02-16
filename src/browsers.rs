@@ -23,6 +23,9 @@ pub fn get_browsers() -> io::Result<Vec<Browser>> {
     for key in browsers_reg.enum_keys().flatten() {
         let browser_key = browsers_reg.open_subkey(key)?;
         let browser_name: String = browser_key.get_value("")?;
+        if browser_name == BROWSER_NAME {
+            continue;
+        }
         let browser_path_key = browser_key.open_subkey("shell\\open\\command")?;
         let browser_path: String = browser_path_key.get_value("")?;
         let browser_path = browser_path.trim_matches('\"').to_string();
