@@ -21,8 +21,12 @@ Options:
   ```
 
 
-  ## What's next
+## What's next
 
-  * Rules set, with time trigger (different set of rules given day and time)
-  * Regexp rules
-  * Add rules from history
+* Rules set, with time trigger (different set of rules given day and time)
+* Regexp rules
+* Add rules from history
+
+## Known issue
+
+* warpbrowser doesn't register as default browser on windows 10
